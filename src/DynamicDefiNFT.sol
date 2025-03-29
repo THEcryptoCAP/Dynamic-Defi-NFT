@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract DynamicDeFiNFT is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
-    // Structured Data Representation
     struct ProtocolData {
         uint256 uniswapValue;
         uint256 aaveValue;
@@ -20,22 +19,14 @@ contract DynamicDeFiNFT is ERC721Enumerable, Ownable {
         uint256 lastUpdated;
     }
 
-    // Mapping Token ID to Performance Data
     mapping(uint256 => ProtocolData) private tokenPerformanceData;
     mapping(uint256 => string) private tokenTwitterHandles;
 
-    // Events for Transparency
     event NFTMinted(address indexed owner, uint256 tokenId);
     event PerformanceUpdated(uint256 indexed tokenId, uint256 timestamp);
 
-    // Constructor
     constructor() ERC721("Dynamic DeFi Performance NFT", "DEFI-PERF") {}
 
-    /**
-     * @dev Mint a new Dynamic DeFi Performance NFT
-     * @param _to Recipient address
-     * @param _twitterHandle User's Twitter handle for YAPS scoring
-     */
     function mint(address _to, string memory _twitterHandle) public returns (uint256) {
         uint256 tokenId = totalSupply() + 1;
         _safeMint(_to, tokenId);
@@ -45,10 +36,6 @@ contract DynamicDeFiNFT is ERC721Enumerable, Ownable {
         return tokenId;
     }
 
-    /**
-     * @dev Update Performance Metrics for a Specific NFT
-     * @notice Only contract owner can update performance data
-     */
     function updatePerformanceMetrics(
         uint256 _tokenId,
         uint256 _uniswapValue,
@@ -73,10 +60,6 @@ contract DynamicDeFiNFT is ERC721Enumerable, Ownable {
         emit PerformanceUpdated(_tokenId, block.timestamp);
     }
 
-    /**
-     * @dev Generate Dynamic SVG Metadata
-     * @notice Generates on-chain SVG with real-time performance data
-     */
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
         require(_exists(_tokenId), "Token does not exist");
 
@@ -104,42 +87,32 @@ contract DynamicDeFiNFT is ERC721Enumerable, Ownable {
         );
     }
 
-    /**
-     * @dev Internal SVG Generation
-     * @notice Generates visual representation of performance data
-     */
-    function generateSVG(
-        uint256 _tokenId, 
-        ProtocolData memory _data
-    ) internal view returns (string memory) {
+    function generateSVG(uint256 _tokenId, ProtocolData memory _data) internal view returns (string memory) {
         return string(
             abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">',
                 '<rect width="100%" height="100%" fill="#f4f4f4"/>',
-                '<text x="50" y="50" font-family="Arial" font-size="16">',
-                'Token ID: ', _tokenId.toString(),
-                '</text>',
-                '<text x="50" y="100" font-family="Arial" font-size="16">',
-                'Twitter: ', tokenTwitterHandles[_tokenId],
-                '</text>',
-                '<text x="50" y="150" font-family="Arial" font-size="16">',
-                'UniSwap Value: $', _data.uniswapValue.toString(),
-                '</text>',
-                // Additional protocol values...
+                '<text x="50" y="50" font-family="Arial" font-size="16">Token ID: ', _tokenId.toString(), '</text>',
+                '<text x="50" y="80" font-family="Arial" font-size="16">Twitter: ', tokenTwitterHandles[_tokenId], '</text>',
+                '<text x="50" y="110" font-family="Arial" font-size="16">Uniswap Value: $', _data.uniswapValue.toString(), '</text>',
+                '<text x="50" y="140" font-family="Arial" font-size="16">Aave Value: $', _data.aaveValue.toString(), '</text>',
+                '<text x="50" y="170" font-family="Arial" font-size="16">Curve Value: $', _data.curveValue.toString(), '</text>',
+                '<text x="50" y="200" font-family="Arial" font-size="16">MakerDAO Value: $', _data.makerDAOValue.toString(), '</text>',
+                '<text x="50" y="230" font-family="Arial" font-size="16">Pendle Value: $', _data.pendleValue.toString(), '</text>',
+                '<text x="50" y="260" font-family="Arial" font-size="16">YAPS Score: ', _data.yapsScore.toString(), '</text>',
+                '<text x="50" y="290" font-family="Arial" font-size="12" fill="gray">Last Updated: ', _data.lastUpdated.toString(), '</text>',
                 '</svg>'
             )
         );
     }
 
-    /**
-     * @dev Retrieve Performance Data for a Token
-     */
-    function getPerformanceData(uint256 _tokenId) 
-        public 
-        view 
-        returns (ProtocolData memory) 
-    {
+    function getPerformanceData(uint256 _tokenId) public view returns (ProtocolData memory) {
         require(_exists(_tokenId), "Token does not exist");
         return tokenPerformanceData[_tokenId];
+    }
+
+    // Explicitly declare ownerOf function
+    function ownerOf(uint256 tokenId) public view override returns (address) {
+        return super.ownerOf(tokenId);
     }
 }
